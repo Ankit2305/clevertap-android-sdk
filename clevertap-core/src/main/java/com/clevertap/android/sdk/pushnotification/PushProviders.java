@@ -40,6 +40,7 @@ import com.clevertap.android.sdk.Logger;
 import com.clevertap.android.sdk.ManifestInfo;
 import com.clevertap.android.sdk.StorageHelper;
 import com.clevertap.android.sdk.Utils;
+import com.clevertap.android.sdk.custom.StickyNotificationBroadcastReceiver;
 import com.clevertap.android.sdk.db.BaseDatabaseManager;
 import com.clevertap.android.sdk.db.DBAdapter;
 import com.clevertap.android.sdk.pushnotification.PushConstants.PushType;
@@ -1091,7 +1092,24 @@ public class PushProviders implements CTPushProviderListener {
             return;
         }
 
+
+
+        //Sticky Notification Add Action Starts
+        if(isStickyNotification(extras)) {
+            Intent dismissIntent = new Intent(context, StickyNotificationBroadcastReceiver.class);
+            dismissIntent.putExtra(StickyNotificationBroadcastReceiver.NOTIFICATION_ID, notificationId);
+            nb.addAction(0, "DISMISS", PendingIntent.getBroadcast(context, 0, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        }
+        //Sticky Notification Add Action Ends
+
         Notification n = nb.build();
+
+        //Sticky Notification Add Flags Starts
+        if(isStickyNotification(extras)) {
+            n.flags = n.flags | Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+        }
+        //Sticky Notification Add Flags Ends
+
         notificationManager.notify(notificationId, n);
         config.getLogger().debug(config.getAccountId(), "Rendered notification: " + n.toString());//cb
 
@@ -1115,5 +1133,9 @@ public class PushProviders implements CTPushProviderListener {
             }
             analyticsManager.pushNotificationViewedEvent(extras);
         }
+    }
+
+    boolean isStickyNotification(Bundle extras) {
+        return extras.containsKey("sticky") && extras.get("sticky").equals("true");
     }
 }

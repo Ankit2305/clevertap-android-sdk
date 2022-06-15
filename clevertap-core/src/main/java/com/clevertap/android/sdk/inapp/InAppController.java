@@ -519,25 +519,28 @@ public class InAppController implements CTInAppNotification.CTInAppNotificationL
             case CTInAppTypeInterstitialImageOnly:
             case CTInAppTypeHalfInterstitialImageOnly:
             case CTInAppTypeCoverImageOnly:
-
-                Intent intent = new Intent(context, InAppNotificationActivity.class);
-                intent.putExtra("inApp", inAppNotification);
-                Bundle configBundle = new Bundle();
-                configBundle.putParcelable("config", config);
-                intent.putExtra("configBundle", configBundle);
                 try {
-                    Activity currentActivity = CoreMetaData.getCurrentActivity();
-                    if (currentActivity == null) {
-                        throw new IllegalStateException("Current activity reference not found");
-                    }
-                    config.getLogger().verbose(config.getAccountId(),
-                            "calling InAppActivity for notification: " + inAppNotification.getJsonDescription());
-                    currentActivity.startActivity(intent);
-                    Logger.d("Displaying In-App: " + inAppNotification.getJsonDescription());
+                    Intent intent = new Intent(context, InAppNotificationActivity.class);
+                    intent.putExtra("inApp", inAppNotification);
+                    Bundle configBundle = new Bundle();
+                    configBundle.putParcelable("config", config);
+                    intent.putExtra("configBundle", configBundle);
+                    try {
+                        Activity currentActivity = CoreMetaData.getCurrentActivity();
+                        if (currentActivity == null) {
+                            throw new IllegalStateException("Current activity reference not found");
+                        }
+                        config.getLogger().verbose(config.getAccountId(),
+                                "calling InAppActivity for notification: " + inAppNotification.getJsonDescription());
+                        currentActivity.startActivity(intent);
+                        Logger.d("Displaying In-App: " + inAppNotification.getJsonDescription());
 
-                } catch (Throwable t) {
-                    Logger.v("Please verify the integration of your app." +
-                            " It is not setup to support in-app notifications yet.", t);
+                    } catch (Throwable t) {
+                        Logger.v("Please verify the integration of your app." +
+                                " It is not setup to support in-app notifications yet.", t);
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
                 break;
             case CTInAppTypeFooterHTML:
